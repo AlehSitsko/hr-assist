@@ -26,9 +26,26 @@ Format: [Added] / [Changed] / [Fixed] / [Removed] / [Security]
 
 ---
 
-## [Unreleased]
-- Add full CRUD API for `Employee`
-- Implement user authentication with JWT
-- Add document upload and preview system
-- Add certificate expiration checker
-- Connect React frontend to backend API
+## [0.2.0] — 2025-07-31
+### Backend API Complete (MVP)
+
+- [Added] Full CRUD API for `Employee` (GET all, GET by ID, POST, PUT, DELETE)
+- [Added] Universal serialization method (`serialize_employee`) to replace `__dict__`
+- [Changed] All endpoints now require JWT authentication with `@jwt_required()`
+- [Added] Email uniqueness check on creation (`POST /employees`)
+- [Added] `GET /employees/<id>` endpoint for fetching single employee
+- [Changed] `updated_at` field now auto-updated on PUT
+- [Planned] Auth endpoint `POST /auth/login` with JWT issuance
+
+🗓 **Dev Log**:
+> "Возвращаюсь к проекту после короткой паузы на основной работе. Решил привести employees.py к финальной форме, сделать его максимально читаемым и безопасным. Добавил защиту маршрутов и универсальную сериализацию. Сюда же начал фиксировать ключевые действия — чтобы было проще восстановить контекст через день или неделю."
+
+## [0.2.1] — 2025-07-31
+### Minimal Auth System
+
+- [Added] Simple hardcoded login: username = "Welcome", password = "Utop1631"
+- [Added] JWT token issuance via `POST /api/auth/login`
+- [Security] All endpoints continue to require valid JWT access token
+
+🗓 **Dev Log**:
+> "Решено не использовать email и базу пользователей — авторизация реализована просто и надёжно. Весь проект работает в оффлайн-среде на 1–2 ПК, поэтому базовая защита логина/пароля вполне оправдана. На всё ушло меньше 10 минут."

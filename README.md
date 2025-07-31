@@ -41,7 +41,7 @@ Edit
 
 ## 🛠 Installation
 
-```bash
+bash
 git clone https://github.com/YOUR_USERNAME/hr-assist.git
 cd hr-assist
 
@@ -78,3 +78,5 @@ Desktop: Electron / PyWebView (planned)
  Admin dashboard & filters
 
  Standalone app (Electron or PyWebView)
+
+

@@ -10,15 +10,16 @@ jwt = JWTManager()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    
-    CORS(app)  # Enable CORS for the app    
-    db.init_app(app)  # Initialize SQLAlchemy with the app
-    jwt.init_app(app)  # Initialize JWTManager with the app
+
+    CORS(app)
+    db.init_app(app)
+    jwt.init_app(app)
 
     # Route imports and registration
-    from .routes.employees import employees_bp
-    from auth.login import login_bp
-    app.register_blueprint(employees_bp, url_prefix='/api/employees')
-    app.register_blueprint(login_bp, url_prefix='/api/auth')
+    from app.routes.employees import employee_bp
+    from auth.login import auth_bp  # auth_bp = login blueprint
+
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(employee_bp, url_prefix='/api/employees')
 
     return app

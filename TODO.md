@@ -10,22 +10,24 @@
 - [x] Implement Employee CRUD API (GET, POST, PUT, DELETE)
 - [x] Implement JWT protection for all API endpoints
 - [x] Email uniqueness validation
-- [ ] Implement Auth login route and token issuance
+- [x] Implement Auth login route and token issuance
 - [ ] File upload logic (documents, certifications)
 - [ ] Document retrieval endpoint
 - [ ] Expiration check utilities (CPR, EVOC, DL)
 
 ---
 
-## 🖥 Frontend (Minimal React Admin Panel)
+## 🖥 Frontend (React Modular System)
 
-- [ ] Set up React project (Vite or CRA)
-- [ ] Create login form (JWT auth)
-- [ ] Create employee list + search
-- [ ] Add employee form (create/edit)
-- [ ] Document upload + view UI
-- [ ] Expiration highlighting (color markers)
-- [ ] Responsive minimal layout (optional)
+- [ ] Initialize React frontend using Vite
+- [ ] Implement login page with JWT auth
+- [ ] Implement dashboard page (component selector)
+- [ ] Set up routing for modules: HR, Scheduling, Call Taking, Patients
+- [ ] Build HR module page (employee list/form)
+- [ ] Add placeholder or embedded call-taking form
+- [ ] Prepare structure for scheduling/hours module (WIP)
+- [ ] Prepare structure for patient/trip database module (WIP)
+- [ ] Ensure JWT token is passed to API requests
 
 ---
 
@@ -41,8 +43,8 @@
 ## 🛡 Security / Access Control
 
 - [x] Protect all API routes with JWT
-- [x] Restrict uploads by file type / size (planned)
-- [ ] Auto-logout for inactive sessions (optional)
+- [x] Simple config-based login (no DB users)
+- [ ] Restrict uploads by file type / size (planned)
 - [ ] Sanitize filename inputs
 
 ---

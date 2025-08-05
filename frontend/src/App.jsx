@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/auth/Login';
 import Dashboard from './components/dashboard/Dashboard';
+import PrivateRoute from './components/auth/PrivateRoute';
 
 function App() {
-  const [user, setUser] = useState(null);
-
-  if (!user) {
-    return <Login onLogin={setUser} />;
-  }
-
-  return <Dashboard user={user} />;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        {/* fallback: если маршрут не найден — редирект на /login */}
+        <Route path="*" element={<Login />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;

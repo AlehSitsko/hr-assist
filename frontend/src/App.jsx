@@ -16,7 +16,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* fallback: если маршрут не найден — редирект на /login */}
+        {/* fallback: if route not found — redirect to /login */}
         <Route path="*" element={<Login />} />
       </Routes>
     </Router>

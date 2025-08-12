@@ -1,0 +1,50 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Python / Flask
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+*.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.pytype/
+.cache/
+instance/
+*.sqlite
+*.sqlite3
+*.db
+.env
+.flaskenv
+
+# Node / React (Vite)
+node_modules/
+dist/
+build/
+.vite/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Misc
+*.swp
+*.swo

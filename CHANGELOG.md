@@ -93,3 +93,37 @@ Format: [Added] / [Changed] / [Fixed] / [Removed] / [Security]
 🗓 Dev Log:
 
 "Сегодня реализована полная авторизация на фронте. Настроил Login.jsx с сохранением токена, защитой маршрутов и редиректом. Подключил PrivateRoute, проверил взаимодействие с backend. Ошибка 401 решена после сверки с config.py. Также добавлены fallback-маршруты и подготовлен TODO.md для следующих шагов — logout, navbar, UI и HR-модуль. Push прошёл успешно."
+
+2025-08-12
+Added
+File helpers: allowed_file, secure_store_name (sanitize+UUID), unique_filename.
+
+Cert helpers: cert_status (date/datetime/None), employee_cert_summary.
+
+413 handler (RequestEntityTooLarge) with JSON response.
+
+Requirements with pinned/compatible versions (Flask 3.0.3, SQLAlchemy ≥2.0.36, etc.).
+
+.gitignore for venv/, uploads/, __pycache__/, IDE files.
+
+Changed
+Switched to app factory: create_app() (CORS, SQLAlchemy, JWT, blueprints).
+
+run.py updated to use factory; creates uploads/ on startup.
+
+Centralized config constants: BASE_DIR, UPLOAD_FOLDER, ALLOWED_EXTENSIONS={pdf,jpg,jpeg,png}, MAX_CONTENT_LENGTH=10MB, EXPIRY_SOON_DAYS=30.
+
+Cleanup and consistent naming in config.py.
+
+Fixed
+Python 3.13 typing issues by upgrading SQLAlchemy and adding typing-extensions.
+
+Missing deps (werkzeug) due to empty requirements.txt.
+
+Startup NameError: app is not defined by refactoring to factory.
+
+Tests
+Smoke tests: config load, uploads/ creation, utils (extensions/UUID), cert statuses.
+
+Temporary /api/dev/echo route used to verify 10MB limit → returns 413 as expected.
+

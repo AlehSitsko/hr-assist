@@ -1,7 +1,7 @@
 # --- File helpers ---
 import uuid
 from werkzeug.utils import secure_filename
-from config import ALLOWED_EXTENSIONS
+from config import ALLOWED_EXTENSIONS  
 
 def allowed_file(filename: str) -> bool:
     if not filename:
@@ -13,7 +13,9 @@ def unique_filename(original: str) -> str:
     return f"{uuid.uuid4().hex}.{ext}" if ext else uuid.uuid4().hex
 
 def secure_store_name(filename: str) -> str:
-    cleaned = secure_filename(filename)
+    cleaned = secure_filename(filename or "")
+    if not cleaned:
+        raise ValueError("Invalid filename")
     return unique_filename(cleaned)
 
 # --- Certificate helpers ---
@@ -34,7 +36,7 @@ def cert_status(expires_on) -> str:
 
 def employee_cert_summary(emp):
     return {
-        "CPR": cert_status(getattr(emp, "cpr_expires", None)),
-        "EVOC": cert_status(getattr(emp, "evoc_expires", None)),
-        "DL":   cert_status(getattr(emp, "dl_expires", None)),
+        "CPR":  cert_status(getattr(emp, "cpr_expiration", None)),
+        "EVOC": cert_status(getattr(emp, "evoc_expiration", None)),
+        "DL":   cert_status(getattr(emp, "dl_expiration", None)),
     }

@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, date
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -10,10 +10,11 @@ class Employee(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     last_name  = db.Column(db.String(100), nullable=False)
 
-    position = db.Column(db.String(100), nullable=False)
-    certification = db.Column(db.String(100), nullable=False)
+    # may not be specified
+    position = db.Column(db.String(100), nullable=True)
 
-    # nullable=True, can be empty if not certified
+    # Required certifications
+    certification = db.Column(db.String(100), nullable=False)
     certification_expiration = db.Column(db.Date, nullable=True)
 
     is_active = db.Column(db.Boolean, default=True)
@@ -39,7 +40,7 @@ class Employee(db.Model):
 
     notes = db.Column(db.Text, nullable=True)
 
-    # leaving empty for now, can be used for future features
+    # Placeholder for document paths, can be removed later
     documents = db.Column(db.String(200), nullable=True)
 
     start_date = db.Column(db.Date, nullable=True)
@@ -65,8 +66,8 @@ class Document(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     employee_id = db.Column(db.Integer, db.ForeignKey("employees.id"), nullable=False)
 
-    stored_name   = db.Column(db.String(255), nullable=False)   # UUID.ext
-    original_name = db.Column(db.String(255), nullable=False)   # исходное имя
+    stored_name   = db.Column(db.String(255), nullable=False)
+    original_name = db.Column(db.String(255), nullable=False)
     mimetype      = db.Column(db.String(100))
     size_bytes    = db.Column(db.Integer)
     uploaded_at   = db.Column(db.DateTime, default=datetime.utcnow)

@@ -1,85 +1,99 @@
 # app/routes/documents.py
 import os
-from flask import Blueprint, request, jsonify, current_app, send_from_directory
+from flask import Blueprint, current_app, request, jsonify
 from flask_jwt_extended import jwt_required
+from werkzeug.datastructures import FileStorage
+
 from app.models import db, Employee, Document
-from config import UPLOAD_FOLDER
 from app.utils import allowed_file, secure_store_name
 
 documents_bp = Blueprint("documents", __name__)
 
 @documents_bp.post("/employees/<int:emp_id>/documents")
 @jwt_required()
-def upload_document(emp_id):
-    emp = Employee.query.get_or_404(emp_id)
+def upload_document(emp_id: int):
+    # 1) сотрудник существует?
+    employee = db.session.get(Employee, emp_id)
+    if not employee:
+        return jsonify({"error": "Employee not found"}), 404
 
-    if "file" not in request.files:
-        return {"error": "No file part"}, 400
-    f = request.files["file"]
-    if not f or f.filename == "":
-        return {"error": "No selected file"}, 400
+    # 2) файл в запросе?
+    f: FileStorage | None = request.files.get("file")
+    if not f or not f.filename:
+        return jsonify({"error": "No file provided"}), 400
+
+    # 3) расширение допустимо?
     if not allowed_file(f.filename):
-        return {"error": "File type not allowed"}, 400
+        return jsonify({"error": "File type not allowed"}), 400
 
-    stored = secure_store_name(f.filename)
-    full_path = os.path.join(UPLOAD_FOLDER, stored)
-    f.save(full_path)
+    # (опционально) базовый guard по mimetype для очевидных кейсов
+    # if f.mimetype not in {"application/pdf", "image/jpeg", "image/png"}:
+    #     return jsonify({"error": "MIME type not allowed"}), 400
 
-    doc = Document(
-        employee_id=emp.id,
-        stored_name=stored,
-        original_name=f.filename,
-        mimetype=f.mimetype,
-        size_bytes=os.path.getsize(full_path),
-    )
-    db.session.add(doc)
-    db.session.commit()
+    try:
+        store_name = secure_store_name(f.filename)  # UUID.ext
+    except ValueError:
+        return jsonify({"error": "Invalid filename"}), 400
 
-    return {
-        "id": doc.id,
-        "original_name": doc.original_name,
-        "uploaded_at": doc.uploaded_at.isoformat()
-    }, 201
+    upload_dir = current_app.config["UPLOAD_FOLDER"]
+    os.makedirs(upload_dir, exist_ok=True)
+    disk_path = os.path.join(upload_dir, store_name)
 
-@documents_bp.get("/employees/<int:emp_id>/documents")
-@jwt_required()
-def list_documents(emp_id):
-    Employee.query.get_or_404(emp_id)  # 404 если нет
-    docs = (Document.query
-            .filter_by(employee_id=emp_id)
-            .order_by(Document.uploaded_at.desc())
-            .all())
-    return jsonify([
-        {
-            "id": d.id,
-            "original_name": d.original_name,
-            "mimetype": d.mimetype,
-            "size_bytes": d.size_bytes,
-            "uploaded_at": d.uploaded_at.isoformat(),
-        } for d in docs
-    ])
+    try:
+        # 4) сохраняем файл на диск
+        f.save(disk_path)
+        size_bytes = os.path.getsize(disk_path)
 
-@documents_bp.get("/documents/<int:doc_id>/download")
-@jwt_required()
-def download_document(doc_id):
-    d = Document.query.get_or_404(doc_id)
-    return send_from_directory(
-        directory=UPLOAD_FOLDER,
-        path=d.stored_name,         # Flask 3: аргумент называется path
-        as_attachment=True,
-        download_name=d.original_name
+        # 5) запись в БД
+        doc = Document(
+            employee_id=emp_id,
+            stored_name=store_name,
+            original_name=f.filename,
+            mimetype=f.mimetype,
+            size_bytes=size_bytes,
+        )
+        db.session.add(doc)
+        db.session.commit()
+
+    except Exception as e:
+        # если что-то пошло не так — чистим за собой
+        db.session.rollback()
+        with contextlib.suppress(Exception):
+            if os.path.exists(disk_path):
+                os.remove(disk_path)
+        return jsonify({"error": str(e)}), 400
+
+    return (
+        jsonify(
+            {
+                "id": doc.id,
+                "employee_id": emp_id,
+                "original_name": doc.original_name,
+                "stored_name": doc.stored_name,
+                "mimetype": doc.mimetype,
+                "size_bytes": doc.size_bytes,
+                "uploaded_at": doc.uploaded_at.isoformat() if doc.uploaded_at else None,
+            }
+        ),
+        201,
     )
 
 @documents_bp.delete("/documents/<int:doc_id>")
 @jwt_required()
-def delete_document(doc_id):
-    d = Document.query.get_or_404(doc_id)
-    fp = os.path.join(UPLOAD_FOLDER, d.stored_name)
+def delete_document(doc_id: int):
+    doc = db.session.get(Document, doc_id)
+    if not doc:
+        return jsonify({"error": "Document not found"}), 404
+
+    upload_dir = current_app.config["UPLOAD_FOLDER"]
+    disk_path = os.path.join(upload_dir, doc.stored_name)
+
     try:
-        if os.path.exists(fp):
-            os.remove(fp)
-    except Exception:
-        pass
-    db.session.delete(d)
-    db.session.commit()
-    return {"status": "ok"}
+        if os.path.exists(disk_path):
+            os.remove(disk_path)
+        db.session.delete(doc)
+        db.session.commit()
+        return jsonify({"message": "Document deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
